@@ -9,7 +9,9 @@ export class MyMCP extends McpAgent {
 		version: "1.0.0",
 	});
 
-	public static env?: any;
+	constructor(private env?: any) {
+		super();
+	}
 
 	async init() {
 		// Simple addition tool
@@ -67,13 +69,20 @@ export class MyMCP extends McpAgent {
 			},
 			async ({ baseId, tableName, maxRecords, view, fields, filterByFormula }) => {
 				try {
-					const apiToken = MyMCP.env?.AIRTABLE_API_TOKEN;
+					console.log('Airtable tool called');
+					console.log('this.env:', this.env);
+					console.log('typeof this.env:', typeof this.env);
+					console.log('Object.keys(this.env || {}):', Object.keys(this.env || {}));
+					
+					const apiToken = this.env?.AIRTABLE_API_TOKEN;
+					console.log('apiToken:', apiToken ? 'FOUND' : 'NOT FOUND');
+					
 					if (!apiToken) {
 						return {
 							content: [
 								{
 									type: "text",
-									text: `Error: AIRTABLE_API_TOKEN environment variable not set. Available env vars: ${JSON.stringify(Object.keys(MyMCP.env || {}), null, 2)}`,
+									text: `Error: AIRTABLE_API_TOKEN environment variable not set. Available env vars: ${JSON.stringify(Object.keys(this.env || {}), null, 2)}`,
 								},
 							],
 						};
@@ -136,16 +145,20 @@ export class MyMCP extends McpAgent {
 	}
 }
 
+// Create global instance
+const mcpInstance = new MyMCP();
+
 export default {
 	fetch(request: Request, env: Env, ctx: ExecutionContext) {
 		const url = new URL(request.url);
 		
-		// Debug: Log environment variables
-		console.log('Environment variables:', Object.keys(env));
-		console.log('AIRTABLE_API_TOKEN:', env.AIRTABLE_API_TOKEN);
+		console.log('Fetch handler called, setting env');
+		console.log('env keys:', Object.keys(env));
 		
-		// Set the environment for the static class
-		MyMCP.env = env;
+		// Set environment on the instance
+		(mcpInstance as any).env = env;
+		
+		console.log('Instance env after setting:', (mcpInstance as any).env);
 
 		if (url.pathname === "/sse" || url.pathname === "/sse/message") {
 			return MyMCP.serveSSE("/sse").fetch(request, env, ctx);
