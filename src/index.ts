@@ -154,6 +154,7 @@ export default {
 		
 		console.log('Fetch handler called, setting env');
 		console.log('env keys:', Object.keys(env));
+		console.log('env:', env);
 		
 		// Set environment on the instance
 		(mcpInstance as any).env = env;
