@@ -9,7 +9,7 @@ export class MyMCP extends McpAgent {
 		version: "1.0.0",
 	});
 
-	private static env?: any;
+	public static env?: any;
 
 	async init() {
 		// Simple addition tool
@@ -73,7 +73,7 @@ export class MyMCP extends McpAgent {
 							content: [
 								{
 									type: "text",
-									text: "Error: AIRTABLE_API_TOKEN environment variable not set",
+									text: `Error: AIRTABLE_API_TOKEN environment variable not set. Available env vars: ${JSON.stringify(Object.keys(MyMCP.env || {}), null, 2)}`,
 								},
 							],
 						};
@@ -139,6 +139,10 @@ export class MyMCP extends McpAgent {
 export default {
 	fetch(request: Request, env: Env, ctx: ExecutionContext) {
 		const url = new URL(request.url);
+		
+		// Debug: Log environment variables
+		console.log('Environment variables:', Object.keys(env));
+		console.log('AIRTABLE_API_TOKEN:', env.AIRTABLE_API_TOKEN);
 		
 		// Set the environment for the static class
 		MyMCP.env = env;
