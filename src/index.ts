@@ -9,8 +9,11 @@ export class MyMCP extends McpAgent {
 		version: "1.0.0",
 	});
 
-	constructor(private env?: any) {
-		super();
+	private env: Env;
+
+	constructor(state: DurableObjectState, env: Env) {
+		super(state, env);
+		this.env = env;
 	}
 
 	async init() {
@@ -69,13 +72,9 @@ export class MyMCP extends McpAgent {
 			},
 			async ({ baseId, tableName, maxRecords, view, fields, filterByFormula }) => {
 				try {
-					console.log('Airtable tool called');
-					console.log('this.env:', this.env);
-					console.log('typeof this.env:', typeof this.env);
-					console.log('Object.keys(this.env || {}):', Object.keys(this.env || {}));
-					
+					console.log('Airtable tool called, checking for API token');
 					const apiToken = this.env?.AIRTABLE_API_TOKEN;
-					console.log('apiToken:', apiToken ? 'FOUND' : 'NOT FOUND');
+					console.log('API token found:', !!apiToken);
 					
 					if (!apiToken) {
 						return {
@@ -145,21 +144,13 @@ export class MyMCP extends McpAgent {
 	}
 }
 
-// Create global instance
-const mcpInstance = new MyMCP();
-
 export default {
 	fetch(request: Request, env: Env, ctx: ExecutionContext) {
 		const url = new URL(request.url);
 		
-		console.log('Fetch handler called, setting env');
+		console.log('Fetch handler called');
 		console.log('env keys:', Object.keys(env));
 		console.log('env:', env);
-		
-		// Set environment on the instance
-		(mcpInstance as any).env = env;
-		
-		console.log('Instance env after setting:', (mcpInstance as any).env);
 
 		if (url.pathname === "/sse" || url.pathname === "/sse/message") {
 			return MyMCP.serveSSE("/sse").fetch(request, env, ctx);
