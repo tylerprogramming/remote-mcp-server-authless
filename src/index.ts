@@ -81,7 +81,7 @@ export class MyMCP extends McpAgent {
 							content: [
 								{
 									type: "text",
-									text: `Error: AIRTABLE_API_TOKEN environment variable not set. Available env vars: ${JSON.stringify(Object.keys(this.env || {}), null, 2)}`,
+									text: "Error: AIRTABLE_API_TOKEN is not set. Add it with `npx wrangler secret put AIRTABLE_API_TOKEN` (or .dev.vars for local dev).",
 								},
 							],
 						};
@@ -147,10 +147,6 @@ export class MyMCP extends McpAgent {
 export default {
 	fetch(request: Request, env: Env, ctx: ExecutionContext) {
 		const url = new URL(request.url);
-		
-		console.log('Fetch handler called');
-		console.log('env keys:', Object.keys(env));
-		console.log('env:', env);
 
 		if (url.pathname === "/sse" || url.pathname === "/sse/message") {
 			return MyMCP.serveSSE("/sse").fetch(request, env, ctx);
